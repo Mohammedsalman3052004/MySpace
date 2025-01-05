@@ -12,6 +12,7 @@ import { redirect } from "next/navigation";
 const getUserByEmail = async (email: string) => {
   const { databases } = await createAdminClient();
 
+  console.log("Database ID:", appwriteConfig.databaseId);
   const result = await databases.listDocuments(
     appwriteConfig.databaseId,
     appwriteConfig.usersCollectionId,
