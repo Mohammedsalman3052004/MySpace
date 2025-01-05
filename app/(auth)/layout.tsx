@@ -3,8 +3,8 @@ import React from "react";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex min-h-screen">
-      <section className="hidden w-1/2 items-center justify-center bg-brand p-10 lg:flex xl:w-2/5">
+    <div className="flex min-h-screen -mt-13 overflow-y-hidden">
+      <section className="main hidden w-1/2 items-center justify-center bg-brand p-10 lg:flex xl:w-2/5">
         <div className="flex max-h-[800px] max-w-[430px] flex-col justify-center space-y-12">
           <Image
             src="/assets/icons/logo.svg"
@@ -38,7 +38,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             alt="logo"
             width={224}
             height={82}
-            className="h-auto w-[200px] lg:w-[250px]"
+            className="h-auto bg-brand-100 flex bg-center ml-4 rounded-full w-[200px] lg:w-[250px]"
           />
         </div>
 
