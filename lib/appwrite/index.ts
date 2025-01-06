@@ -1,6 +1,5 @@
-import { Avatars, Client, Databases } from "node-appwrite";
+import { Client, Databases } from "node-appwrite";
 import { appwriteConfig } from "@/lib/appwrite/config";
-import { Database } from "lucide-react";
 import { cookies } from "next/headers";
 import { Account } from "node-appwrite";
 
