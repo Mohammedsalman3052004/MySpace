@@ -25,7 +25,7 @@ const Search = () => {
       if (debouncedQuery.length === 0) {
         setResults([]);
         setOpen(false);
-        return router.push(path.replace(searchParams.toString(), ""));
+        return router.push(path?.replace(searchParams?.toString() || "", "") || "/");
       }
 
       const files = await getFiles({ types: [], searchText: debouncedQuery });
@@ -34,7 +34,7 @@ const Search = () => {
     };
 
     fetchFiles();
-  }, [debouncedQuery]);
+  }, [debouncedQuery, path, router, searchParams]);
 
   useEffect(() => {
     if (!searchQuery) {
