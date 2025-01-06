@@ -1,7 +1,6 @@
-import { Client, Databases } from "node-appwrite";
+import { Client, Databases, Storage, Account } from "node-appwrite";
 import { appwriteConfig } from "@/lib/appwrite/config";
 import { cookies } from "next/headers";
-import { Account } from "node-appwrite";
 
 export const createSessionClient = async () => {
   const client = new Client()
@@ -25,7 +24,8 @@ export const createAdminClient = () => {
     .setKey(appwriteConfig.secretKey);
 
   const databases = new Databases(client);
+  const storage = new Storage(client);
   const account = new Account(client);
 
-  return { databases, account };
+  return { databases, storage, account };
 };
