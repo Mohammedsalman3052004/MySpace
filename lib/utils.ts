@@ -14,6 +14,14 @@ type TotalSpace = {
   other: SpaceInfo;
 };
 
+type UsageSummaryItem = {
+  title: string;
+  size: number;
+  latestDate: string;
+  icon: string;
+  url: string;
+};
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -196,7 +204,7 @@ export const constructDownloadUrl = (bucketFileId: string) => {
 };
 
 // DASHBOARD UTILS
-export const getUsageSummary = (totalSpace: TotalSpace) => {
+export const getUsageSummary = (totalSpace: TotalSpace): UsageSummaryItem[] => {
   return [
     {
       title: "Documents",
