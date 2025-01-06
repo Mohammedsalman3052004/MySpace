@@ -1,6 +1,19 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+type SpaceInfo = {
+  size: number;
+  latestDate: string;
+};
+
+type TotalSpace = {
+  document: SpaceInfo;
+  image: SpaceInfo;
+  video: SpaceInfo;
+  audio: SpaceInfo;
+  other: SpaceInfo;
+};
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -183,7 +196,7 @@ export const constructDownloadUrl = (bucketFileId: string) => {
 };
 
 // DASHBOARD UTILS
-export const getUsageSummary = (totalSpace: any) => {
+export const getUsageSummary = (totalSpace: TotalSpace) => {
   return [
     {
       title: "Documents",
