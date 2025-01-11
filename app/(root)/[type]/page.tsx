@@ -31,11 +31,10 @@ const Page = async ({ searchParams, params }: SearchParamProps) => {
           </div>
         </div>
       </section>
-
       {/* Render the files */}
-      {files.total > 0 ? (
+      {Array.isArray(files) && files.length > 0 ? (
         <section className="file-list">
-          {files.documents.map((file: Models.Document) => (
+          {files.map((file: Models.Document) => (
             <Card key={file.$id} file={file} />
           ))}
         </section>

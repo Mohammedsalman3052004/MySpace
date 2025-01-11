@@ -1,4 +1,4 @@
-"use server";
+"use server"
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { InputFile } from "node-appwrite/file";
@@ -39,7 +39,9 @@ export const uploadFile = async ({
       owner: ownerId,
       accountId,
       users: [],
+      bucketId: appwriteConfig.bucketId,
       bucketFileId: bucketFile.$id,
+      bucketField: bucketFile.$id,
     };
 
     const newFile = await databases
@@ -47,7 +49,7 @@ export const uploadFile = async ({
         appwriteConfig.databaseId,
         appwriteConfig.filesCollectionId,
         ID.unique(),
-        fileDocument
+        fileDocument,
       )
       .catch(async (error: unknown) => {
         await storage.deleteFile(appwriteConfig.bucketId, bucketFile.$id);
@@ -98,23 +100,43 @@ export const getFiles = async ({
 }: GetFilesProps) => {
   const { databases } = await createAdminClient();
 
-  try {
-    const currentUser = await getCurrentUser();
+  // try {
+  //   const currentUser = await getCurrentUser();
 
-    if (!currentUser) throw new Error("User not found");
+  //   if (!currentUser) throw new Error("User not found");
 
-    const queries = createQueries(currentUser, types, searchText, sort, limit);
+  //   const queries = createQueries(currentUser, types, searchText, sort, limit);
 
-    const files = await databases.listDocuments(
-      appwriteConfig.databaseId,
-      appwriteConfig.filesCollectionId,
-      queries
-    );
+  //   const files = await databases.listDocuments(
+  //     appwriteConfig.databaseId,
+  //     appwriteConfig.filesCollectionId,
+  //     queries
+  //   );
 
-    console.log({ files });
-    return parseStringify(files);
-  } catch (error) {
-    handleError(error, "Failed to get files");
+  async function fetchFiles(types: string[], searchText: string, sort: string, limit?: number) {
+    try {
+      // Fetch the current user
+      const currentUser = await getCurrentUser();
+      if (!currentUser) {
+        throw new Error("User not found");
+      }
+  
+      // Create queries
+      const queries = createQueries(currentUser, types, searchText, sort, limit);
+      console.log("Generated queries:", queries);
+  
+      // Fetch documents from Appwrite
+      const files = await databases.listDocuments(
+        appwriteConfig.databaseId,
+        appwriteConfig.filesCollectionId,
+        queries
+      );
+  
+      return files; // Return fetched files
+    } catch (error) {
+      console.error("Error fetching files:", (error as Error).message);
+      throw error;
+    }
   }
 };
 
@@ -196,7 +218,8 @@ export const deleteFile = async ({
 // ============================== TOTAL FILE SPACE USED
 export async function getTotalSpaceUsed() {
   try {
-    const { databases } = await createSessionClient();
+    const { databases } = await createAdminClient();
+    if (!databases) throw new Error("Database client is not available.");
     const currentUser = await getCurrentUser();
     if (!currentUser) throw new Error("User is not authenticated.");
 

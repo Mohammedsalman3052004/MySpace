@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 interface Props {
   fullName: string;
   avatar: string;
-  email: string;
+  email: string; 
 }
 
 const Sidebar = ({ fullName, avatar, email }: Props) => {

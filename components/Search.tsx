@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+// import { usePathname, useRouter, useSearchParams } from "next/router";
 import { getFiles } from "@/lib/actions/file.actions";
 import { Models } from "node-appwrite";
 import Thumbnail from "@/components/Thumbnail";
 import FormattedDateTime from "@/components/FormattedDateTime";
 import { useDebounce } from "use-debounce";
+
 const Search = () => {
   const [query, setQuery] = useState("");
   const searchParams = useSearchParams();
@@ -20,21 +21,43 @@ const Search = () => {
   const path = usePathname();
   const [debouncedQuery] = useDebounce(query, 300);
 
-  useEffect(() => {
-    const fetchFiles = async () => {
+  const handleSearch = async () => {
+    try {
       if (debouncedQuery.length === 0) {
         setResults([]);
         setOpen(false);
-        return router.push(path?.replace(searchParams?.toString() || "", "") || "/");
+        const currentPath = path || "/";
+        const searchParamsString = searchParams?.toString();
+        const newPath = searchParamsString 
+          ? currentPath.split('?')[0] 
+          : currentPath;
+        await router.push(newPath);
+        if (debouncedQuery.length === 0) {
+          setResults([]);
+          setOpen(false);
+          const currentPath = path || "/";
+          const searchParamsString = searchParams?.toString();
+          const newPath = searchParamsString 
+            ? currentPath.split('?')[0] 
+            : currentPath;
+          await router.push(newPath);
+          return;
+        } else {
+          const files = await getFiles({ types: [], searchText: debouncedQuery });
+          setResults(files as unknown as Models.Document[]);
+          setOpen(true);
+        }
       }
+    } catch (error) {
+      console.error('Error in search:', error);
+      setResults([]);
+      setOpen(false);
+    }
+  }
 
-      const files = await getFiles({ types: [], searchText: debouncedQuery });
-      setResults(files.documents);
-      setOpen(true);
-    };
-
-    fetchFiles();
-  }, [debouncedQuery, path, router, searchParams]);
+  useEffect(() => {
+    handleSearch();
+  }, [debouncedQuery]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -45,10 +68,8 @@ const Search = () => {
   const handleClickItem = (file: Models.Document) => {
     setOpen(false);
     setResults([]);
-
-    router.push(
-      `/${file.type === "video" || file.type === "audio" ? "media" : file.type + "s"}?query=${query}`,
-    );
+    const newPath = `/${file.type === "video" || file.type === "audio" ? "media" : file.type + "s"}?query=${query}`;
+    router.push(newPath);
   };
 
   return (
@@ -65,6 +86,7 @@ const Search = () => {
           placeholder="Search..."
           className="search-input"
           onChange={(e) => setQuery(e.target.value)}
+          type="text"
         />
 
         {open && (
