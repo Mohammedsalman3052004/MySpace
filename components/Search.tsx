@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-// import { usePathname, useRouter, useSearchParams } from "next/router";
 import { getFiles } from "@/lib/actions/file.actions";
 import { Models } from "node-appwrite";
 import Thumbnail from "@/components/Thumbnail";
@@ -23,47 +22,33 @@ const Search = () => {
 
   const handleSearch = async () => {
     try {
-      if (debouncedQuery.length === 0) {
+      if (!debouncedQuery || debouncedQuery.length === 0) {
         setResults([]);
         setOpen(false);
-        const currentPath = path || "/";
-        const searchParamsString = searchParams?.toString();
-        const newPath = searchParamsString 
-          ? currentPath.split('?')[0] 
-          : currentPath;
-        await router.push(newPath);
-        if (debouncedQuery.length === 0) {
-          setResults([]);
-          setOpen(false);
-          const currentPath = path || "/";
-          const searchParamsString = searchParams?.toString();
-          const newPath = searchParamsString 
-            ? currentPath.split('?')[0] 
-            : currentPath;
-          await router.push(newPath);
-          return;
-        } else {
-          const files = await getFiles({ types: [], searchText: debouncedQuery });
-          setResults(files as unknown as Models.Document[]);
-          setOpen(true);
-        }
+        return;
       }
+
+      const files = await getFiles({ 
+        types: [], 
+        searchText: debouncedQuery.toString() 
+      });
+      
+      setResults(files.documents || []);
+      setOpen(true);
     } catch (error) {
       console.error('Error in search:', error);
       setResults([]);
       setOpen(false);
     }
-  }
+  };
 
   useEffect(() => {
-    handleSearch();
+    const timeoutId = setTimeout(() => {
+      handleSearch();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
   }, [debouncedQuery]);
-
-  useEffect(() => {
-    if (!searchQuery) {
-      setQuery("");
-    }
-  }, [searchQuery]);
 
   const handleClickItem = (file: Models.Document) => {
     setOpen(false);

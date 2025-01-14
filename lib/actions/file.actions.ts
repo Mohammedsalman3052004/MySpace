@@ -1,4 +1,4 @@
-"use server"
+"use server";
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { InputFile } from "node-appwrite/file";
@@ -7,6 +7,7 @@ import { ID, Models, Query } from "node-appwrite";
 import { constructFileUrl, getFileType, parseStringify } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/actions/user.actions";
+import { Files } from "lucide-react";
 
 const handleError = (error: unknown, message: string) => {
   console.log(error, message);
@@ -19,10 +20,12 @@ export const uploadFile = async ({
   accountId,
   path,
 }: UploadFileProps) => {
-  const { storage, databases } = await createAdminClient();
-
   try {
-    const inputFile = InputFile.fromBuffer(file, file.name);
+    const { storage, databases } = await createAdminClient();
+
+    // Upload file to storage
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const inputFile = InputFile.fromBuffer(buffer, file.name);
 
     const bucketFile = await storage.createFile(
       appwriteConfig.bucketId,
@@ -30,6 +33,7 @@ export const uploadFile = async ({
       inputFile
     );
 
+    // Create document in database
     const fileDocument = {
       type: getFileType(bucketFile.name).type,
       name: bucketFile.name,
@@ -44,22 +48,18 @@ export const uploadFile = async ({
       bucketField: bucketFile.$id,
     };
 
-    const newFile = await databases
-      .createDocument(
-        appwriteConfig.databaseId,
-        appwriteConfig.filesCollectionId,
-        ID.unique(),
-        fileDocument,
-      )
-      .catch(async (error: unknown) => {
-        await storage.deleteFile(appwriteConfig.bucketId, bucketFile.$id);
-        handleError(error, "Failed to create file document");
-      });
+    const newFile = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollectionId,
+      ID.unique(),
+      fileDocument
+    );
 
     revalidatePath(path);
     return parseStringify(newFile);
   } catch (error) {
-    handleError(error, "Failed to upload file");
+    console.error("Upload error:", error);
+    throw error;
   }
 };
 
@@ -98,45 +98,26 @@ export const getFiles = async ({
   sort = "$createdAt-desc",
   limit,
 }: GetFilesProps) => {
-  const { databases } = await createAdminClient();
-
-  // try {
-  //   const currentUser = await getCurrentUser();
-
-  //   if (!currentUser) throw new Error("User not found");
-
-  //   const queries = createQueries(currentUser, types, searchText, sort, limit);
-
-  //   const files = await databases.listDocuments(
-  //     appwriteConfig.databaseId,
-  //     appwriteConfig.filesCollectionId,
-  //     queries
-  //   );
-
-  async function fetchFiles(types: string[], searchText: string, sort: string, limit?: number) {
-    try {
-      // Fetch the current user
-      const currentUser = await getCurrentUser();
-      if (!currentUser) {
-        throw new Error("User not found");
-      }
-  
-      // Create queries
-      const queries = createQueries(currentUser, types, searchText, sort, limit);
-      console.log("Generated queries:", queries);
-  
-      // Fetch documents from Appwrite
-      const files = await databases.listDocuments(
-        appwriteConfig.databaseId,
-        appwriteConfig.filesCollectionId,
-        queries
-      );
-  
-      return files; // Return fetched files
-    } catch (error) {
-      console.error("Error fetching files:", (error as Error).message);
-      throw error;
+  try {
+    const { databases } = await createAdminClient();
+    const currentUser = await getCurrentUser();
+    
+    if (!currentUser) {
+      return { documents: [] }; // Return empty array instead of throwing error
     }
+
+    const queries = createQueries(currentUser, types, searchText, sort, limit);
+
+    const files = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollectionId,
+      queries
+    );
+
+    return files;
+  } catch (error) {
+    console.error("Error fetching files:", error);
+    return { documents: [] };
   }
 };
 
@@ -219,9 +200,20 @@ export const deleteFile = async ({
 export async function getTotalSpaceUsed() {
   try {
     const { databases } = await createAdminClient();
-    if (!databases) throw new Error("Database client is not available.");
     const currentUser = await getCurrentUser();
-    if (!currentUser) throw new Error("User is not authenticated.");
+    
+    // Instead of throwing error, return default values if user is not authenticated
+    if (!currentUser) {
+      return parseStringify({
+        image: { size: 0, latestDate: "" },
+        document: { size: 0, latestDate: "" },
+        video: { size: 0, latestDate: "" },
+        audio: { size: 0, latestDate: "" },
+        other: { size: 0, latestDate: "" },
+        used: 0,
+        all: 2 * 1024 * 1024 * 1024,
+      });
+    }
 
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
@@ -236,10 +228,10 @@ export async function getTotalSpaceUsed() {
       audio: { size: 0, latestDate: "" },
       other: { size: 0, latestDate: "" },
       used: 0,
-      all: 2 * 1024 * 1024 * 1024 /* 2GB available bucket storage */,
+      all: 2 * 1024 * 1024 * 1024,
     };
 
-    files.documents.forEach((file) => {
+    files.documents.forEach((file: Models.Document) => {
       const fileType = file.type as FileType;
       totalSpace[fileType].size += file.size;
       totalSpace.used += file.size;
@@ -254,6 +246,16 @@ export async function getTotalSpaceUsed() {
 
     return parseStringify(totalSpace);
   } catch (error) {
-    handleError(error, "Error calculating total space used:, ");
+    console.error("Error in getTotalSpaceUsed:", error);
+    // Return default values instead of throwing error
+    return parseStringify({
+      image: { size: 0, latestDate: "" },
+      document: { size: 0, latestDate: "" },
+      video: { size: 0, latestDate: "" },
+      audio: { size: 0, latestDate: "" },
+      other: { size: 0, latestDate: "" },
+      used: 0,
+      all: 2 * 1024 * 1024 * 1024,
+    });
   }
 }
