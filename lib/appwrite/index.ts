@@ -3,19 +3,27 @@ import { appwriteConfig } from "@/lib/appwrite/config";
 import { cookies } from "next/headers";
 
 export const createSessionClient = async () => {
-  const client = new Client()
-    .setEndpoint(appwriteConfig.endpointUrl)
-    .setProject(appwriteConfig.projectId);
+  try {
+    const client = new Client()
+      .setEndpoint(appwriteConfig.endpointUrl)
+      .setProject(appwriteConfig.projectId);
 
-  const session = (await cookies()).get("appwrite-session");
-  if (!session || !session.value) throw new Error("No session found");
-  
-  client.setSession(session.value);
+    const session = (await cookies()).get("appwrite-session");
+    
+    if (!session || !session.value) {
+      return { account: null, databases: null };
+    }
 
-  const account = new Account(client);
-  const databases = new Databases(client);
+    client.setSession(session.value);
 
-  return { account, databases };
+    const account = new Account(client);
+    const databases = new Databases(client);
+
+    return { account, databases };
+  } catch (error) {
+    console.error("Session client error:", error);
+    return { account: null, databases: null };
+  }
 };
 
 export const createAdminClient = () => {

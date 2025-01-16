@@ -112,7 +112,7 @@ const OtpModal = ({
                 variant="link"
                 className="pl-1 text-brand"
                 onClick={handleResendOtp}
-              >
+              >  
                 Click to resend
               </Button>
             </div>

@@ -11,14 +11,21 @@ import FormattedDateTime from "@/components/FormattedDateTime";
 import { useDebounce } from "use-debounce";
 
 const Search = () => {
-  const [query, setQuery] = useState("");
-  const searchParams = useSearchParams();
-  const searchQuery = searchParams?.get("query") || "";
-  const [results, setResults] = useState<Models.Document[]>([]);
-  const [open, setOpen] = useState(false);
   const router = useRouter();
   const path = usePathname();
+  const searchParams = useSearchParams();
+  
+  // Initialize state with empty values
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Models.Document[]>([]);
+  const [open, setOpen] = useState(false);
   const [debouncedQuery] = useDebounce(query, 300);
+
+  // Initialize search query from URL params in useEffect
+  useEffect(() => {
+    const searchQuery = searchParams?.get("query") || "";
+    setQuery(searchQuery);
+  }, [searchParams]);
 
   const handleSearch = async () => {
     try {
@@ -33,7 +40,7 @@ const Search = () => {
         searchText: debouncedQuery.toString() 
       });
       
-      setResults(files.documents || []);
+      setResults(files?.documents || []);
       setOpen(true);
     } catch (error) {
       console.error('Error in search:', error);
