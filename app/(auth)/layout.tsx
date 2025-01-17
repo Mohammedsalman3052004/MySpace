@@ -12,6 +12,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             width={550}
             height={82}
             className=" h-auto"
+            // pr
+            
           />
 
           <div className="space-y-5 text-white">
