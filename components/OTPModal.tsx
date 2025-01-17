@@ -40,7 +40,7 @@ const OtpModal = ({
       const sessionId = await verifySecret({ accountId, password });
 
       if (sessionId) {
-        router.push("/documents");
+        router.push("/");
         router.refresh();
       }
     } catch (error) {
