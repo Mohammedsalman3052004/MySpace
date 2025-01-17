@@ -50,7 +50,7 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
   };
 
   const handleAction = async () => {
-    if (!action) return;
+    if (!action || !path) return;
     setIsLoading(true);
     let success = false;
 
@@ -65,11 +65,11 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     success = await actions[action.value as keyof typeof actions]();
 
     if (success) closeAllModals();
-
     setIsLoading(false);
   };
 
   const handleRemoveUser = async (email: string) => {
+    if (!path) return;
     const updatedEmails = emails.filter((e) => e !== email);
 
     const success = await updateFileUsers({

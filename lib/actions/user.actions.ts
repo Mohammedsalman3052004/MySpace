@@ -1,4 +1,4 @@
-'use server'
+"use server";
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/appwrite/config";
@@ -8,15 +8,13 @@ import { cookies } from "next/headers";
 import { avatarPlaceholderUrl } from "@/constants";
 import { redirect } from "next/navigation";
 
-
 const getUserByEmail = async (email: string) => {
   const { databases } = await createAdminClient();
 
-  console.log("Database ID:", appwriteConfig.databaseId);
   const result = await databases.listDocuments(
     appwriteConfig.databaseId,
     appwriteConfig.usersCollectionId,
-    [Query.equal("email", [email])], 
+    [Query.equal("email", [email])],
   );
 
   return result.total > 0 ? result.documents[0] : null;
@@ -38,7 +36,6 @@ export const sendEmailOTP = async ({ email }: { email: string }) => {
     handleError(error, "Failed to send email OTP");
   }
 };
-
 
 export const createAccount = async ({
   fullName,
@@ -74,7 +71,7 @@ export const createAccount = async ({
 export const verifySecret = async ({
   accountId,
   password,
-}: {  
+}: {
   accountId: string;
   password: string;
 }) => {
@@ -99,6 +96,11 @@ export const verifySecret = async ({
 export const getCurrentUser = async () => {
   try {
     const { databases, account } = await createSessionClient();
+    
+    if (!account || !databases) {
+      return null;
+    }
+
     const result = await account.get();
 
     const user = await databases.listDocuments(
@@ -110,6 +112,7 @@ export const getCurrentUser = async () => {
     if (user.total <= 0) return null;
     return parseStringify(user.documents[0]);
   } catch (error) {
+    console.error("Error getting current user:", error);
     return null;
   }
 };
@@ -118,7 +121,9 @@ export const signOutUser = async () => {
   const { account } = await createSessionClient();
 
   try {
-    await account.deleteSession("current");
+    if (account) {
+      await account.deleteSession("current");
+    }
     (await cookies()).delete("appwrite-session");
   } catch (error) {
     handleError(error, "Failed to sign out user");

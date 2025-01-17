@@ -12,7 +12,7 @@ const handleError = (error: unknown, message: string) => {
   console.log(error, message);
   throw error;
 };
-  
+
 export const uploadFile = async ({
   file,
   ownerId,
@@ -61,9 +61,9 @@ export const uploadFile = async ({
   }
 };
 
-const createQueries = ( 
+const createQueries = (
   currentUser: Models.Document,
-  types: string[],  
+  types: string[],
   searchText: string,
   sort: string,
   limit?: number,
@@ -96,28 +96,25 @@ export const getFiles = async ({
   sort = "$createdAt-desc",
   limit,
 }: GetFilesProps) => {
+  const { databases } = await createAdminClient();
+
   try {
-    const { databases } = await createAdminClient();
     const currentUser = await getCurrentUser();
 
-    // Return empty results instead of throwing error
-    if (!currentUser) {
-      return { documents: [] };
-    }
+    if (!currentUser) throw new Error("User not found");
 
     const queries = createQueries(currentUser, types, searchText, sort, limit);
-
 
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
-      queries
+      queries,
     );
 
+    console.log({ files });
     return parseStringify(files);
   } catch (error) {
-    console.error("Error fetching files:", error);
-    return { documents: [] }; // Return empty results on error
+    handleError(error, "Failed to get files");
   }
 };
 
@@ -201,19 +198,8 @@ export async function getTotalSpaceUsed() {
   try {
     const { databases } = await createSessionClient();
     const currentUser = await getCurrentUser();
-    
-    // Return default values if no session or user
-    if (!databases || !currentUser) {
-      return parseStringify({
-        image: { size: 0, latestDate: "" },
-        document: { size: 0, latestDate: "" },
-        video: { size: 0, latestDate: "" },
-        audio: { size: 0, latestDate: "" },
-        other: { size: 0, latestDate: "" },
-        used: 0,
-        all: 2 * 1024 * 1024 * 1024,
-      });
-    }
+    if (!currentUser) throw new Error("User is not authenticated.");
+    if (!databases) throw new Error("Databases client is not available.");
 
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
@@ -246,15 +232,6 @@ export async function getTotalSpaceUsed() {
 
     return parseStringify(totalSpace);
   } catch (error) {
-    console.error("Error calculating total space:", error);
-    return parseStringify({
-      image: { size: 0, latestDate: "" },
-      document: { size: 0, latestDate: "" },
-      video: { size: 0, latestDate: "" },
-      audio: { size: 0, latestDate: "" },
-      other: { size: 0, latestDate: "" },
-      used: 0,
-      all: 2 * 1024 * 1024 * 1024,
-    });
+    handleError(error, "Error calculating total space used:, ");
   }
 }
