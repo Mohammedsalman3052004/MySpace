@@ -100,8 +100,10 @@ export const getFiles = async ({
 
   try {
     const currentUser = await getCurrentUser();
-
-    if (!currentUser) throw new Error("User not found");
+    
+    if (!currentUser) {
+      return { documents: [] };
+    }
 
     const queries = createQueries(currentUser, types, searchText, sort, limit);
 
@@ -111,10 +113,10 @@ export const getFiles = async ({
       queries,
     );
 
-    console.log({ files });
     return parseStringify(files);
   } catch (error) {
-    handleError(error, "Failed to get files");
+    console.error("Error fetching files:", error);
+    return { documents: [] };
   }
 };
 
