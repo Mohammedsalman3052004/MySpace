@@ -33,14 +33,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </section>
       
-      <section className="flex flex-1 flex-col items-center bg-white p-4 py-10 lg:justify-center lg:p-10 lg:py-0">
+      <section className="loginpage-mobile flex flex-1 flex-col items-center bg-white p-4 py-10 lg:justify-center lg:p-10 lg:py-0">
         <div className="mb-16 lg:hidden">
           <Image
             src="/assets/icons/logo.svg"
             alt="logo"
-            width={224}
-            height={82}
-            className="h-auto bg-brand-100 flex bg-center ml-4 rounded-full w-[200px] lg:w-[250px]"
+            width={304}
+            height={102}
+            className="loginpage-mobiel-logo h-auto  flex bg-center ml-4 rounded-full w-[200px] lg:w-[250px]"
           />
         </div>
 
