@@ -470,3 +470,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+
+.loginpage-full-screen{
+  height: 100vh;
+  overflow: hidden;
+}
+
+.loginpage-logo-img{
+  position: relative;
+  margin-left: -10%;
+}
+.loginpage-files-img{
+  position: relative;
+  margin-left: 12%;
+}
