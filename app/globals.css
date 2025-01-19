@@ -486,3 +486,13 @@
   position: relative;
   margin-left: 12%;
 }
+.loginpage-mobiel-logo{
+  position: relative;
+  margin-left: -10%;
+  margin-top: -10%;
+}
+.loginpage-mobile{
+  height: 23vh;
+  width: 100%;
+  background-color: #21253e;
+}
