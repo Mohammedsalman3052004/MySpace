@@ -9,7 +9,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <Image
             src="/assets/icons/logo.svg"
             alt="logo"
-            width={550}
+            width={273}
             height={82}
             className=" h-auto"
             // pr
@@ -38,7 +38,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <Image
             src="/assets/icons/logo.svg"
             alt="logo"
-            width={224}
+            width={225}
             height={82}
             className="h-auto bg-brand-100 flex bg-center ml-4 rounded-full w-[200px] lg:w-[250px]"
           />
