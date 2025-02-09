@@ -497,3 +497,21 @@
   align-items: center;
   width: 100%;
 }
+
+/* Logo  */
+@media screen and (max-width: 600px) {
+  .desktop-logo {
+    display: none;
+  }
+  .mobile-logo {
+    display: block;
+  }
+}
+@media screen and (max-width: 600px) {
+  .desktop-logo {
+    display: block;
+  }
+  .mobile-logo {
+    display: none;
+  }
+}
