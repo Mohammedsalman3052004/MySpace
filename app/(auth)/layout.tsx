@@ -7,15 +7,19 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <section className="main hidden w-1/2 items-center justify-center bg-brand p-10 lg:flex xl:w-2/5">
         <div className="flex max-h-[800px] max-w-[430px] flex-col justify-center space-y-12">
           <Image
+            src="/assets/icons/logo-desktop.svg"
+            alt="logo"
+            width={274}
+            height={82}
+            className="loginpage-logo-img h-auto desktop-logo"
+          />
+           <Image
             src="/assets/icons/logo.svg"
             alt="logo"
             width={274}
             height={82}
-            className="loginpage-logo-img h-auto"
-            // pr
-            
+            className="loginpage-logo-img h-auto mobile-logo"
           />
-
           <div className="space-y-5 text-white">
             <h1 className="h1">Effortless file management <span className="text-blue"> made simple.</span></h1>
             <p className="body-1">
